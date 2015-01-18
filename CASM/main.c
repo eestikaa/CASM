@@ -9,14 +9,20 @@ int main()
 
     scanf("%d", &answer);
 
-    printf("You made it here\n");
-    srand(time(NULL));
-    initialize_deck(&deck);
-    printf("You made it here too, deck initialized!\n");
-    shuffle(&deck);
-    printf("Deck shuffled!\n");
-    play_round(deck);
+    //We generate a random seed and XOR it with the time to generate a third seed.
+    int random = arand(0);
 
+    printf("Generated random in assembly function :  %d\n", random);
+    srand(time(NULL)^random);
+    int total_turns = 0;
+    for(int j = 0; j<answer; j++){
+        initialize_deck(&deck);
+    	shuffle(&deck);
+        total_turns +=play_round(deck);
+    }
+    int avg = total_turns/answer;
+    printf("The average game took %d turns!\n Press enter to exit.", avg);
+    getchar();
     return 0;
 }
 
@@ -94,14 +100,20 @@ int play_round(int deck[]){
 
 	printf("Cards dealt to players, beginning round!\n");
 
-	getchar();
-	getchar();
 	//The game part.
 	int count = 0;
 
 	while(player_one_cards!=CARDCOUNT && player_two_cards!=CARDCOUNT){
 		count++;
-
+		if((player_one[0]%13==-1) && (player_two[0]%13==-1)){
+			if(player_one_cards>player_two_cards){
+				printf("Player one wins the war!\n");
+				return count;
+			} else {
+				printf("Player one wins the war!\n");
+				return count;
+			}
+		}
 		if((player_one[0]%13)<(player_two[0]%13)){
 
 			int card1, card2;
@@ -129,59 +141,36 @@ int play_round(int deck[]){
 		} else {
 
 			int cards[52];
-			memcpy(&cards[0], &player_one[0], sizeof(int));
-			memcpy(&cards[1], &player_two[0], sizeof(int));
-			memcpy(&cards[2], &player_one[1], sizeof(int));
-			memcpy(&cards[3], &player_two[1], sizeof(int));
-			memcpy(&cards[4], &player_one[2], sizeof(int));
-			memcpy(&cards[5], &player_two[2], sizeof(int));
-			for(int i=0; 3>i; i++){
+			int firstrun = 1;
+			int n = 0;
+			int n_player = 0;
+
+			while( (cards[n]%13) == (cards[n+1]%13) || (firstrun==1) ){
+				memcpy(&cards[n], &player_one[n_player], sizeof(int));
+				memcpy(&cards[n+1], &player_two[n_player], sizeof(int));
 				shift_hand(player_one); shift_hand(player_two);
 				player_one_cards--;
-				player_two_cards--;
+				player_one_cards--;
+				n+=2;
+				n_player++;
+				firstrun = 0;
 			}
-
-			if((cards[4]%13) > (cards[5]%13)){
-				add_war_victory(player_one, cards, player_one_cards, 6);
-				player_one_cards+=6;
-			} else if((cards[5]%13) > (cards[4]%13)) {
-				add_war_victory(player_two, cards, player_two_cards, 6);
-				player_two_cards+=6;
-			} else {
-				int firstrun = 1;
-				int n = 6;
-				int n_player = 3;
-
-				while( (cards[n]%13) == (cards[n+1]%13) || (firstrun==1)){
-					shift_hand(player_one); shift_hand(player_two);
-					player_one_cards--;
-					player_one_cards--;
-
-					memcpy(&cards[n], &player_one[n_player], sizeof(int));
-					memcpy(&cards[n+1], &player_two[n_player], sizeof(int));
-					n+=2;
-					n_player++;
-					firstrun = 0;
-				}
-				if((cards[n-2]%13) > (cards[n-1]%13)){
-					add_war_victory(player_one, cards, player_one_cards, n);
-					player_one_cards+=n;
-				} else if((cards[n-2]%13) > (cards[n-1]%13)) {
-					player_two_cards+=n;
-					add_war_victory(player_two, cards, player_two_cards, n);
-					player_one_cards+=n;
-				}
+			if((cards[n-2]%13) > (cards[n-1]%13)){
+				add_war_victory(player_one, cards, player_one_cards, n);
+				player_one_cards+=n;
+			} else if((cards[n-2]%13) < (cards[n-1]%13)) {
+				add_war_victory(player_two, cards, player_two_cards, n);
+				player_two_cards+=n;
 			}
 		}
 	}
-	printf("IT TOOK ONLY %d TURNS\n", count);
 	if(player_one_cards==CARDCOUNT){
-		printf("PLAYER ONE WINS THE WAR!");
-		return 1;
-	} else {
-		printf("PLAYER TWO WINS THE WAR!");
-		return 2;
-	}
+		printf("Player one wins the war!\n");
+			return count;
+		} else {
+			printf("Player one wins the war!\n");
+			return count;
+		}
 }
 
 void shift_hand(int hand[]){
