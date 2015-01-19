@@ -6,3 +6,5 @@
 * @return Random 32-bit integer
 */
 int arand(int seed);
+
+int astartswith(char *inpstr, char *with);

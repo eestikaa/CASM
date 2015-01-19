@@ -40,3 +40,25 @@ globalfunc _arand, seed:dword
 	pop EBX
 	
 	epilogue
+
+globalfunc _astartswith, inpstr:dword, with:dword
+	prologue
+	push EBX
+	push ESI
+	
+	mov ebx, .inpstr
+	mov esi, .with
+	mov bl, byte[ebx]
+	mov bh, byte[esi]
+	.if bl==bh
+		mov eax, 1
+	.elseif bl!=bh
+		mov eax, 0
+	.endif
+	
+	pop ESI
+	pop EBX
+	epilogue
+
+	
+	

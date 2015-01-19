@@ -7,8 +7,10 @@ int main()
 
     printf("\nHow many games would you like to simulate?\n");
 
+	int derr = astartswith("test", "t");
     scanf("%d", &answer);
 
+	printf("The answer to your tere is %d\n", derr);
     //We generate a random seed and XOR it with the time to generate a third seed.
     int random = arand(0);
 
@@ -21,7 +23,8 @@ int main()
         total_turns +=play_round(deck);
     }
     int avg = total_turns/answer;
-    printf("The average game took %d turns!\n Press enter to exit.", avg);
+    printf("The average game took %d turns!\n Press enter to exit.\n", avg);
+	getchar();
     getchar();
     return 0;
 }
